@@ -149,5 +149,141 @@
              Stops the tasks execution.
              </summary>
             </member>
+        <member name="T:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation">
+             <summary>
+             Binary string representation.
+             </summary>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToRepresentation(System.Int64,System.Int32)">
+             <summary>
+             Converts the long value to the binary string representation.
+             </summary>
+             <returns>The representation.</returns>
+             <param name="value">Value.</param>
+             <param name="totalBits">Total bits.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToRepresentation(System.Int64,System.Int32,System.Boolean)">
+             <summary>
+             Converts the long value to the binary string representation.
+             </summary>
+             <returns>The representation.</returns>
+             <param name="value">Value.</param>
+             <param name="totalBits">Total bits.</param>
+             <param name="throwsException">If should throws an exception when the total bits is lower than needed by the value.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToRepresentation(System.Int64[],System.Int32[])">
+             <summary>
+             Converts the long values to the binary string representations.
+             </summary>
+             <returns>The representation.</returns>
+             <param name="values">Values.</param>
+             <param name="totalBits">Total bits.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToInt64(System.String)">
+             <summary>
+             Converts from string representation to Int64.
+             </summary>
+             <returns>The int64.</returns>
+             <param name="representation">Representation.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToInt64(System.String,System.Int32[])">
+             <summary>
+             Converts from string representation to Int64[].
+             </summary>
+             <returns>The int64.</returns>
+             <param name="representation">Representation.</param>
+             <param name="totalBits">Total bits.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToRepresentation(System.Double,System.Int32,System.Int32)">
+             <summary>
+             Converts from double to string representation .
+             </summary>
+             <returns>The representation.</returns>
+             <param name="value">Value.</param>
+             <param name="totalBits">Total bits.</param>
+             <param name="fractionBits">Fraction (scale) bits.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToRepresentation(System.Double[],System.Int32[],System.Int32[])">
+             <summary>
+             Converts from doubles to strings representation .
+             </summary>
+             <returns>The representations.</returns>
+             <param name="values">The values..</param>
+             <param name="totalBits">The total bits.</param>
+             <param name="fractionBits">The fraction (scale) bits.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToDouble(System.String,System.Int32)">
+             <summary>
+             Converts from string representation to double.
+             </summary>
+             <returns>The double.</returns>
+             <param name="representation">Representation.</param>
+             <param name="fractionBits">Fraction (scale) bits.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.BinaryStringRepresentation.ToDouble(System.String,System.Int32[],System.Int32[])">
+             <summary>
+             Converts from string representation to doubles.
+             </summary>
+             <returns>The double.</returns>
+             <param name="representation">Representation.</param>
+             <param name="totalBits">Total bits.</param>
+             <param name="fractionBits">Fraction (scale) bits.</param>
+            </member>
+        <member name="T:GeneticSharp.Infrastructure.Framework.Texts.StringExtensions">
+             <summary>
+             String extensions.
+             </summary>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Texts.StringExtensions.With(System.String,System.Object[])">
+             <summary>
+             Replaces the format items in the string with the string representation of
+             corresponding objects in the specified array.
+             </summary>
+             <remarks>
+             An invariant culture is used to format.
+             </remarks>
+             <returns>The formatted string..</returns>
+             <param name="value">The string.</param>
+             <param name="args">The arguments..</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Texts.StringExtensions.RemovePunctuations(System.String)">
+             <summary>
+             Removes the punctuations.
+             </summary>
+             <returns>The clean string.</returns>
+             <param name="source">The source string.</param>
+            </member>
+        <member name="T:GeneticSharp.Infrastructure.Framework.Commons.ExceptionHelper">
+             <summary>
+             Exception helper.
+             </summary>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.ExceptionHelper.ThrowIfNull(System.String,System.Object)">
+             <summary>
+             Throws an ArgumentNullException if argument is null.
+             </summary>
+             <param name="argumentName">The argument name.</param>
+             <param name="argument">The argument.</param>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Commons.ExceptionHelper.ThrowIfNullOrEmpty(System.String,System.String)">
+             <summary>
+             Throws an ArgumentNullException if argument is null or an ArgumentException if string is empty.
+             </summary>
+             <param name="argumentName">The argument name.</param>
+             <param name="argument">The argument.</param>
+            </member>
+        <member name="T:GeneticSharp.Infrastructure.Framework.Collections.EnumerableExtensions">
+             <summary>
+             Enumerable extensions.
+             </summary>
+            </member>
+        <member name="M:GeneticSharp.Infrastructure.Framework.Collections.EnumerableExtensions.Each``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
+             <summary>
+             Iterates in the collection calling the action for each item.
+             </summary>
+             <param name="self">The enumerable it self.</param>
+             <param name="action">The each action.</param>
+             <typeparam name="T">The 1st type parameter.</typeparam>
+            </member>
     </members>
 </doc>

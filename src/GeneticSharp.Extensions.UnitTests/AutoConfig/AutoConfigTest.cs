@@ -48,11 +48,19 @@ namespace GeneticSharp.Extensions.UnitTests.AutoConfig
                 MaxThreads = 20
             };        
 
-            ga.Termination = new GenerationNumberTermination(2);
+            ga.Termination = new GenerationNumberTermination(10);
             ga.Start();
 
             Assert.NotNull(ga.BestChromosome);            
         }
 
+		[Test()]
+		public void GenerateGene_InvalidIndex_Exception()
+		{
+			var target = new AutoConfigChromosome();
+
+			var actual = Assert.Catch(() => target.GenerateGene(9));
+			Assert.AreEqual("Invalid AutoConfigChromosome gene index.", actual.Message);
+		}
     }
 }

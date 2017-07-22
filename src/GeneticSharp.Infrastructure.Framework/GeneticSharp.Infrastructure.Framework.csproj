@@ -14,6 +14,7 @@
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <ReleaseVersion>1.1.0</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,13 +48,7 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="SmartThreadPool">
-      <HintPath>..\packages\SmartThreadPool.dll.2.2.3\lib\SmartThreadPool.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="HelperSharp, Version=1.0.5560.27038, Culture=neutral, PublicKeyToken=3d44152485e1a4e1">
-      <HintPath>..\packages\HelperSharp.0.0.4.2\lib\net35\HelperSharp.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Reflection\TypeHelper.cs" />
@@ -63,10 +58,16 @@
     </Compile>
     <Compile Include="Threading\LinearTaskExecutor.cs" />
     <Compile Include="Threading\TaskExecutorBase.cs" />
+    <Compile Include="Commons\BinaryStringRepresentation.cs" />
+    <Compile Include="..\GeneticSharp.Domain\Properties\SolutionInfo.cs">
+      <Link>Properties\SolutionInfo.cs</Link>
+    </Compile>
+    <Compile Include="Texts\StringExtensions.cs" />
+    <Compile Include="Commons\ExceptionHelper.cs" />
+    <Compile Include="Collections\EnumerableExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GeneticSharp.snk" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -78,4 +79,9 @@
   -->
   <ItemGroup />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <ItemGroup>
+    <Folder Include="Commons\" />
+    <Folder Include="Texts\" />
+    <Folder Include="Collections\" />
+  </ItemGroup>
 </Project>
