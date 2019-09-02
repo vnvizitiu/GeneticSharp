@@ -4,6 +4,7 @@ using GeneticSharp.Domain.Chromosomes;
 using GeneticSharp.Domain.Populations;
 using GeneticSharp.Infrastructure.Framework.Texts;
 using GeneticSharp.Infrastructure.Framework.Commons;
+using System.Linq;
 
 namespace GeneticSharp.Domain.Selections
 {
@@ -13,7 +14,7 @@ namespace GeneticSharp.Domain.Selections
     public abstract class SelectionBase : ISelection
     {
         #region Fields
-        private int m_minNumberChromosomes;
+        private readonly int m_minNumberChromosomes;
         #endregion
 
         #region Constructors
@@ -38,10 +39,17 @@ namespace GeneticSharp.Domain.Selections
         {
             if (number < m_minNumberChromosomes)
             {
-                throw new ArgumentOutOfRangeException("number", "The number of selected chromosomes should be at least {0}.".With(m_minNumberChromosomes));
+                throw new ArgumentOutOfRangeException(nameof(number), "The number of selected chromosomes should be at least {0}.".With(m_minNumberChromosomes));
             }
 
             ExceptionHelper.ThrowIfNull("generation", generation);
+
+            if (generation.Chromosomes.Any(c => !c.Fitness.HasValue))
+            {
+                throw new SelectionException(
+                       this,
+                       "There are chromosomes with null fitness.");
+            }
 
             return PerformSelectChromosomes(number, generation);
         }

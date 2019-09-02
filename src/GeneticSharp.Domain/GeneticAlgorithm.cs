@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using GeneticSharp.Domain.Chromosomes;
 using GeneticSharp.Domain.Crossovers;
 using GeneticSharp.Domain.Fitnesses;
 using GeneticSharp.Domain.Mutations;
 using GeneticSharp.Domain.Populations;
-using GeneticSharp.Domain.Randomizations;
 using GeneticSharp.Domain.Reinsertions;
 using GeneticSharp.Domain.Selections;
 using GeneticSharp.Domain.Terminations;
@@ -77,8 +77,9 @@ namespace GeneticSharp.Domain
 
         #region Fields
         private bool m_stopRequested;
-        private object m_lock = new object();
+        private readonly object m_lock = new object();
         private GeneticAlgorithmState m_state;
+        private Stopwatch m_stopwatch;
         #endregion              
 
         #region Constructors
@@ -97,7 +98,7 @@ namespace GeneticSharp.Domain
                           ICrossover crossover,
                           IMutation mutation)
         {
-            ExceptionHelper.ThrowIfNull("Population", population);
+            ExceptionHelper.ThrowIfNull("population", population);
             ExceptionHelper.ThrowIfNull("fitness", fitness);
             ExceptionHelper.ThrowIfNull("selection", selection);
             ExceptionHelper.ThrowIfNull("crossover", crossover);
@@ -116,6 +117,7 @@ namespace GeneticSharp.Domain
             TimeEvolving = TimeSpan.Zero;
             State = GeneticAlgorithmState.NotStarted;
             TaskExecutor = new LinearTaskExecutor();
+            OperatorsStrategy = new DefaultOperatorsStrategy();
         }
         #endregion
 
@@ -137,6 +139,11 @@ namespace GeneticSharp.Domain
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Gets the operators strategy
+        /// </summary>
+        public IOperatorsStrategy OperatorsStrategy { get; set; }
+
         /// <summary>
         /// Gets the population.
         /// </summary>
@@ -231,7 +238,7 @@ namespace GeneticSharp.Domain
 
                 if (shouldStop)
                 {
-                    Stopped(this, EventArgs.Empty);
+                    Stopped?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -264,9 +271,10 @@ namespace GeneticSharp.Domain
             lock (m_lock)
             {
                 State = GeneticAlgorithmState.Started;
-                var startDateTime = DateTime.Now;
+                m_stopwatch = Stopwatch.StartNew();
                 Population.CreateInitialGeneration();
-                TimeEvolving = DateTime.Now - startDateTime;
+                m_stopwatch.Stop();
+                TimeEvolving = m_stopwatch.Elapsed;
             }
 
             Resume();
@@ -291,7 +299,8 @@ namespace GeneticSharp.Domain
                 {
                     throw new InvalidOperationException("Attempt to resume a genetic algorithm which was not yet started.");
                 }
-                else if (Population.GenerationsNumber > 1)
+
+                if (Population.GenerationsNumber > 1)
                 {
                     if (Termination.HasReached(this))
                     {
@@ -307,7 +316,6 @@ namespace GeneticSharp.Domain
                 }
 
                 bool terminationConditionReached = false;
-                DateTime startDateTime;
 
                 do
                 {
@@ -316,9 +324,10 @@ namespace GeneticSharp.Domain
                         break;
                     }
 
-                    startDateTime = DateTime.Now;
+                    m_stopwatch.Restart();
                     terminationConditionReached = EvolveOneGeneration();
-                    TimeEvolving += DateTime.Now - startDateTime;
+                    m_stopwatch.Stop();
+                    TimeEvolving += m_stopwatch.Elapsed;
                 }
                 while (!terminationConditionReached);
             }
@@ -368,19 +377,15 @@ namespace GeneticSharp.Domain
             EvaluateFitness();
             Population.EndCurrentGeneration();
 
-            if (GenerationRan != null)
-            {
-                GenerationRan(this, EventArgs.Empty);
-            }
+            var handler = GenerationRan;
+            handler?.Invoke(this, EventArgs.Empty);
 
             if (Termination.HasReached(this))
             {
                 State = GeneticAlgorithmState.TerminationReached;
 
-                if (TerminationReached != null)
-                {
-                    TerminationReached(this, EventArgs.Empty);
-                }
+                handler = TerminationReached;
+                handler?.Invoke(this, EventArgs.Empty);
 
                 return true;
             }
@@ -415,7 +420,7 @@ namespace GeneticSharp.Domain
 
                 if (!TaskExecutor.Start())
                 {
-                    throw new TimeoutException("The fitness evaluation rech the {0} timeout.".With(TaskExecutor.Timeout));
+                    throw new TimeoutException("The fitness evaluation reached the {0} timeout.".With(TaskExecutor.Timeout));
                 }
             }
             finally
@@ -430,9 +435,8 @@ namespace GeneticSharp.Domain
         /// <summary>
         /// Runs the evaluate fitness.
         /// </summary>
-        /// <returns>The evaluate fitness.</returns>
         /// <param name="chromosome">The chromosome.</param>
-        private object RunEvaluateFitness(object chromosome)
+        private void RunEvaluateFitness(object chromosome)
         {
             var c = chromosome as IChromosome;
 
@@ -444,8 +448,6 @@ namespace GeneticSharp.Domain
             {
                 throw new FitnessException(Fitness, "Error executing Fitness.Evaluate for chromosome: {0}".With(ex.Message), ex);
             }
-
-            return c.Fitness;
         }
 
         /// <summary>
@@ -464,22 +466,7 @@ namespace GeneticSharp.Domain
         /// <returns>The result chromosomes.</returns>
         private IList<IChromosome> Cross(IList<IChromosome> parents)
         {
-            var offspring = new List<IChromosome>();
-
-            for (int i = 0; i < Population.MinSize; i += Crossover.ParentsNumber)
-            {
-                var selectedParents = parents.Skip(i).Take(Crossover.ParentsNumber).ToList();
-
-                // If match the probability cross is made, otherwise the offspring is an exact copy of the parents.
-                // Checks if the number of selected parents is equal which the crossover expect, because the in the end of the list we can
-                // have some rest chromosomes.
-                if (selectedParents.Count == Crossover.ParentsNumber && RandomizationProvider.Current.GetDouble() <= CrossoverProbability)
-                {
-                    offspring.AddRange(Crossover.Cross(selectedParents));
-                }
-            }
-
-            return offspring;
+            return OperatorsStrategy.Cross(Population, Crossover, CrossoverProbability, parents);
         }
 
         /// <summary>
@@ -488,10 +475,7 @@ namespace GeneticSharp.Domain
         /// <param name="chromosomes">The chromosomes.</param>
         private void Mutate(IList<IChromosome> chromosomes)
         {
-            foreach (var c in chromosomes)
-            {
-                Mutation.Mutate(c, MutationProbability);
-            }
+            OperatorsStrategy.Mutate(Mutation, MutationProbability, chromosomes);
         }
 
         /// <summary>

@@ -173,10 +173,7 @@ namespace GeneticSharp.Domain.Populations
         /// <param name="args">The event arguments.</param>
         protected virtual void OnBestChromosomeChanged(EventArgs args)
         {
-            if (BestChromosomeChanged != null)
-            {
-                BestChromosomeChanged(this, args);
-            }
+            BestChromosomeChanged?.Invoke(this, args);
         }
         #endregion
     }

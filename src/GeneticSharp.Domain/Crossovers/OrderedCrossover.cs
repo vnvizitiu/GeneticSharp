@@ -60,20 +60,20 @@ namespace GeneticSharp.Domain.Crossovers
         /// <returns>The offspring (children) of the parents.</returns>
         protected override IList<IChromosome> PerformCross(IList<IChromosome> parents)
         {
-            var firstParent = parents[0];
-            var secondParent = parents[1];
+            var parentOne = parents[0];
+            var parentTwo = parents[1];
 
             if (parents.AnyHasRepeatedGene())
             {
                 throw new CrossoverException(this, "The Ordered Crossover (OX1) can be only used with ordered chromosomes. The specified chromosome has repeated genes.");
             }
 
-            var middleSectionIndexes = RandomizationProvider.Current.GetUniqueInts(2, 0, firstParent.Length);
+            var middleSectionIndexes = RandomizationProvider.Current.GetUniqueInts(2, 0, parentOne.Length);
             Array.Sort(middleSectionIndexes);
             var middleSectionBeginIndex = middleSectionIndexes[0];
             var middleSectionEndIndex = middleSectionIndexes[1];
-            var firstChild = CreateChild(firstParent, secondParent, middleSectionBeginIndex, middleSectionEndIndex);
-            var secondChild = CreateChild(secondParent, firstParent, middleSectionBeginIndex, middleSectionEndIndex);
+            var firstChild = CreateChild(parentOne, parentTwo, middleSectionBeginIndex, middleSectionEndIndex);
+            var secondChild = CreateChild(parentTwo, parentOne, middleSectionBeginIndex, middleSectionEndIndex);
 
             return new List<IChromosome>() { firstChild, secondChild };
         }
@@ -89,25 +89,28 @@ namespace GeneticSharp.Domain.Crossovers
         private static IChromosome CreateChild(IChromosome firstParent, IChromosome secondParent, int middleSectionBeginIndex, int middleSectionEndIndex)
         {
             var middleSectionGenes = firstParent.GetGenes().Skip(middleSectionBeginIndex).Take((middleSectionEndIndex - middleSectionBeginIndex) + 1);
-            var secondParentRemainingGenes = secondParent.GetGenes().Except(middleSectionGenes).GetEnumerator();
-            var child = firstParent.CreateNew();
 
-            for (int i = 0; i < firstParent.Length; i++)
+            using (var secondParentRemainingGenes = secondParent.GetGenes().Except(middleSectionGenes).GetEnumerator())
             {
-                var firstParentGene = firstParent.GetGene(i);
+                var child = firstParent.CreateNew();
 
-                if (i >= middleSectionBeginIndex && i <= middleSectionEndIndex)
+                for (int i = 0; i < firstParent.Length; i++)
                 {
-                    child.ReplaceGene(i, firstParentGene);
+                    var firstParentGene = firstParent.GetGene(i);
+
+                    if (i >= middleSectionBeginIndex && i <= middleSectionEndIndex)
+                    {
+                        child.ReplaceGene(i, firstParentGene);
+                    }
+                    else
+                    {
+                        secondParentRemainingGenes.MoveNext();
+                        child.ReplaceGene(i, secondParentRemainingGenes.Current);
+                    }
                 }
-                else
-                {
-                    secondParentRemainingGenes.MoveNext();
-                    child.ReplaceGene(i, secondParentRemainingGenes.Current);
-                }
+
+                return child;
             }
-
-            return child;
         }
         #endregion
     }

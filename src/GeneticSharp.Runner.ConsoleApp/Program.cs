@@ -3,7 +3,6 @@ using System.IO;
 using GeneticSharp.Domain;
 using GeneticSharp.Domain.Populations;
 using GeneticSharp.Infrastructure.Framework.Reflection;
-using GeneticSharp.Infrastructure.Threading;
 using GeneticSharp.Runner.ConsoleApp.Samples;
 
 namespace GeneticSharp.Runner.ConsoleApp
@@ -42,6 +41,7 @@ namespace GeneticSharp.Runner.ConsoleApp
             catch (Exception)
             {
                 Console.WriteLine("Invalid option.");
+                return;
             }
 
             var sampleController = TypeHelper.CreateInstanceByName<ISampleController>(selectedSampleName);
@@ -58,7 +58,7 @@ namespace GeneticSharp.Runner.ConsoleApp
             population.GenerationStrategy = new PerformanceGenerationStrategy();
 
             var ga = new GeneticAlgorithm(population, fitness, selection, crossover, mutation);
-            ga.Termination = sampleController.CreateTermination();            
+            ga.Termination = sampleController.CreateTermination();
 
             var terminationName = ga.Termination.GetType().Name;
 
@@ -71,6 +71,7 @@ namespace GeneticSharp.Runner.ConsoleApp
                 Console.WriteLine("Generations: {0}", ga.Population.GenerationsNumber);
                 Console.WriteLine("Fitness: {0,10}", bestChromosome.Fitness);
                 Console.WriteLine("Time: {0}", ga.TimeEvolving);
+                Console.WriteLine("Speed (gen/sec): {0:0.0000}", ga.Population.GenerationsNumber / ga.TimeEvolving.TotalSeconds);
                 sampleController.Draw(bestChromosome);
             };
 

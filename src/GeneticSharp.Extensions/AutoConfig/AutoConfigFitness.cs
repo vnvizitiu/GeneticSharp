@@ -15,8 +15,8 @@ namespace GeneticSharp.Extensions.AutoConfig
     public sealed class AutoConfigFitness : IFitness
     {
         #region Fields
-        private IFitness m_targetFitness;
-        private IChromosome m_targetChromosome;
+        private readonly IFitness m_targetFitness;
+        private readonly IChromosome m_targetChromosome;
         #endregion
 
         #region Constructor               
@@ -92,6 +92,8 @@ namespace GeneticSharp.Extensions.AutoConfig
             }
             catch (Exception)
             {
+                // The selection, crossover and mutation combination is not valid,
+                // so this chromossome should have a bad fitness.
                 return 0;
             }
 

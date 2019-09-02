@@ -6,7 +6,6 @@ using GeneticSharp.Domain.Selections;
 using GeneticSharp.Domain.Terminations;
 using GeneticSharp.Extensions.Tsp;
 using NUnit.Framework;
-using TestSharp;
 
 namespace GeneticSharp.Extensions.UnitTests.Tsp
 {
@@ -33,11 +32,8 @@ namespace GeneticSharp.Extensions.UnitTests.Tsp
 
             ga.Termination = new GenerationNumberTermination(1001);
 
-            TimeAssert.LessThan(100000, () =>
-            {
-                ga.Start();
-            });
-
+            ga.Start();
+          
             var lastDistance = ((TspChromosome)ga.Population.BestChromosome).Distance;
 
             Assert.Less(lastDistance, firstDistance);

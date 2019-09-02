@@ -1,6 +1,4 @@
-﻿using System;
-using NUnit.Framework;
-using Rhino.Mocks;
+﻿using NUnit.Framework;
 using GeneticSharp.Domain.Chromosomes;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +9,7 @@ namespace GeneticSharp.Domain.UnitTests.Chromosomes
 	public class BinaryChromosomeBaseTest
 	{
 		[Test]
-		public void FlipBit_Index_ValueFlip()
+		public void FlipGene_Index_ValueFlip()
 		{
 			var target = new BinaryChromosomeStub (2);
 			target.ReplaceGenes (0, new Gene[] {

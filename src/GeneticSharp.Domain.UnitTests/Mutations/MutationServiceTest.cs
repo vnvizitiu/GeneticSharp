@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using GeneticSharp.Domain.Mutations;
+using GeneticSharp.Domain.Randomizations;
+using NSubstitute;
 using NUnit.Framework;
-using TestSharp;
 
 namespace GeneticSharp.Domain.UnitTests.Mutations
 {
@@ -14,11 +15,14 @@ namespace GeneticSharp.Domain.UnitTests.Mutations
         {
             var actual = MutationService.GetMutationTypes();
 
-            Assert.AreEqual(4, actual.Count);
-			Assert.AreEqual(typeof(FlipBitMutation), actual[0]);
-            Assert.AreEqual(typeof(ReverseSequenceMutation), actual[1]);
-            Assert.AreEqual(typeof(TworsMutation), actual[2]);
-            Assert.AreEqual(typeof(UniformMutation), actual[3]);
+            Assert.AreEqual(7, actual.Count);
+            Assert.AreEqual(typeof(DisplacementMutation), actual[0]);
+            Assert.AreEqual(typeof(FlipBitMutation), actual[1]);
+            Assert.AreEqual(typeof(InsertionMutation), actual[2]);
+            Assert.AreEqual(typeof(PartialShuffleMutation), actual[3]);
+            Assert.AreEqual(typeof(ReverseSequenceMutation), actual[4]);
+            Assert.AreEqual(typeof(TworsMutation), actual[5]);
+            Assert.AreEqual(typeof(UniformMutation), actual[6]);
         }
 
         [Test()]
@@ -26,29 +30,32 @@ namespace GeneticSharp.Domain.UnitTests.Mutations
         {
             var actual = MutationService.GetMutationNames();
 
-            Assert.AreEqual(4, actual.Count);
-			Assert.AreEqual("Flip Bit", actual[0]);
-            Assert.AreEqual("Reverse Sequence (RSM)", actual[1]);
-            Assert.AreEqual("Twors", actual[2]);
-            Assert.AreEqual("Uniform", actual[3]);
+            Assert.AreEqual(7, actual.Count);
+            Assert.AreEqual("Displacement", actual[0]);
+            Assert.AreEqual("Flip Bit", actual[1]);
+            Assert.AreEqual("Insertion", actual[2]);
+            Assert.AreEqual("Partial Shuffle (PSM)", actual[3]);
+            Assert.AreEqual("Reverse Sequence (RSM)", actual[4]);
+            Assert.AreEqual("Twors", actual[5]);
+            Assert.AreEqual("Uniform", actual[6]);
         }
 
         [Test()]
         public void CreateMutationByName_InvalidName_Exception()
         {
-            ExceptionAssert.IsThrowing(new ArgumentException("There is no IMutation implementation with name 'Test'.", "name"), () =>
+            Assert.Catch<ArgumentException>(() =>
             {
                 MutationService.CreateMutationByName("Test");
-            });
+            }, "There is no IMutation implementation with name 'Test'.");
         }
 
         [Test()]
         public void CreateMutationByName_ValidNameButInvalidConstructorArgs_Exception()
         {
-            ExceptionAssert.IsThrowing(new ArgumentException("A IMutation's implementation with name 'Uniform' was found, but seems the constructor args were invalid.", "constructorArgs"), () =>
+            Assert.Catch<ArgumentException>(() =>
             {
                 MutationService.CreateMutationByName("Uniform", 1f);
-            });
+            }, "A IMutation's implementation with name 'Uniform' was found, but seems the constructor args were invalid.");
         }
 
         [Test()]
@@ -67,10 +74,10 @@ namespace GeneticSharp.Domain.UnitTests.Mutations
         [Test()]
         public void GetMutationTypeByName_InvalidName_Exception()
         {
-            ExceptionAssert.IsThrowing(new ArgumentException("There is no IMutation implementation with name 'Test'.", "name"), () =>
+            Assert.Catch<ArgumentException>(() =>
             {
                 MutationService.GetMutationTypeByName("Test");
-            });
+            }, "There is no IMutation implementation with name 'Test'.");
         }
 
         [Test()]
@@ -84,6 +91,34 @@ namespace GeneticSharp.Domain.UnitTests.Mutations
 
             actual = MutationService.GetMutationTypeByName("Uniform");
             Assert.AreEqual(typeof(UniformMutation), actual);
+        }
+
+        [Test()]
+        public void Shuffle_Source_Shuffled()
+        {
+            var rnd = Substitute.For<IRandomization>();
+            rnd.GetInt(0, 5).Returns(4);
+            rnd.GetInt(0, 4).Returns(2);
+            rnd.GetInt(0, 3).Returns(3);
+            rnd.GetInt(0, 2).Returns(0);
+            rnd.GetInt(0, 1).Returns(1);
+
+            var actual = new int[] { 1, 2, 3, 4, 5 }.Shuffle(rnd);
+            CollectionAssert.AreEqual(new int[] { 5, 3, 4, 1, 2 }, actual);
+        }
+
+        [Test()]
+        public void LeftShift_ValueToShift_Shifted()
+        {
+             var actual = new int[] { 1, 2, 3, 4, 5 }.LeftShift(2);
+            CollectionAssert.AreEqual(new int[] { 3, 4, 5, 1, 2 }, actual);
+        }
+
+        [Test()]
+        public void RightShift_ValueToShift_Shifted()
+        {
+            var actual = new int[] { 1, 2, 3, 4, 5 }.RightShift(2);
+            CollectionAssert.AreEqual(new int[] { 4, 5, 1, 2, 3 }, actual);
         }
     }
 }

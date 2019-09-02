@@ -1,17 +1,18 @@
 ﻿using GeneticSharp.Domain.Randomizations;
+using System;
 using System.Collections;
 using System.Linq;
 
 namespace GeneticSharp.Domain.Chromosomes
 {
-	/// <summary>
-	/// Integer chromosome with binary values (0 and 1).
-	/// </summary>
-	public class IntegerChromosome : BinaryChromosomeBase
+    /// <summary>
+    /// Integer chromosome with binary values (0 and 1).
+    /// </summary>
+    public class IntegerChromosome : BinaryChromosomeBase
 	{
-		private int m_minValue;
-		private int m_maxValue;
-		private BitArray m_originalValue;
+		private readonly int m_minValue;
+		private readonly int m_maxValue;
+		private readonly BitArray m_originalValue;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="T:GeneticSharp.Domain.Chromosomes.IntegerChromosome"/> class.
@@ -28,7 +29,6 @@ namespace GeneticSharp.Domain.Chromosomes
 			CreateGenes();
 		}
 
-		#region implemented abstract members of ChromosomeBase
 		/// <summary>
 		/// Generates the gene.
 		/// </summary>
@@ -50,8 +50,6 @@ namespace GeneticSharp.Domain.Chromosomes
 			return new IntegerChromosome(m_minValue, m_maxValue);
 		}
 
-		#endregion
-
 		/// <summary>
 		/// Converts the chromosome to its integer representation.
 		/// </summary>
@@ -65,6 +63,29 @@ namespace GeneticSharp.Domain.Chromosomes
 
 			return array[0];
 		}
-	}
+
+        /// <summary>
+		/// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:GeneticSharp.Domain.Chromosomes.FloatingPointChromosome"/>.
+		/// </summary>
+		/// <returns>A <see cref="T:System.String"/> that represents the current <see cref="T:GeneticSharp.Domain.Chromosomes.FloatingPointChromosome"/>.</returns>
+		public override string ToString()
+        {
+            return String.Join("", GetGenes().Reverse().Select(g => (bool) g.Value ? "1" : "0").ToArray());
+        }
+
+        /// <summary>
+        /// Flips the gene.
+        /// </summary>
+        /// <remarks>>
+        /// If gene's value is 0, the it will be flip to 1 and vice-versa.</remarks>
+        /// <param name="index">The gene index.</param>
+        public override void FlipGene(int index)
+        {
+            var realIndex = Math.Abs(31 - index);
+            var value = (bool)GetGene(realIndex).Value;
+
+            ReplaceGene(realIndex, new Gene(!value));
+        }
+    }
 }
 
